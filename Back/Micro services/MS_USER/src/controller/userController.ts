@@ -36,8 +36,8 @@ export const checkPassword = (req: Request, res: Response):boolean => {
 
     const resultat = zxcvbn.default(password);
 
-    if(resultat.score < 4){
-        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send(`Your password is not enough strong (${resultat.score}/4)`)
+    if(resultat.score < 2){
+        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send(`Password not strong enough (${resultat.score}/4)`)
         return false
     }
     return true
@@ -50,7 +50,7 @@ export const checkExistingAccountRegister = async (req: Request, res: Response):
     const existingUser = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
 
     if (existingUser.rows.length > 0) {
-        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("This email is already use by an account");
+        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("Existing account found, please login");
         return false
     }
 
@@ -62,8 +62,8 @@ export const checkExistingAccountLogin = async (req: Request, res: Response):Pro
 
     const existingUser = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
 
-    if (existingUser.rows.length < 0) {
-        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("Wrong email / password");
+    if (existingUser.rows.length <= 0) {
+        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("No account found, please subscribe first");
         return false
     }
 
@@ -71,21 +71,23 @@ export const checkExistingAccountLogin = async (req: Request, res: Response):Pro
 };
 
 export const addNewUser = async (req: Request, res: Response):Promise<boolean> => {
-    const { email, password, name, surname } = req.body
+    const { email, password, username } = req.body
 
-    if(!name || !surname){
+    if(!username){
         res.status(statusCode.STATUS_CODE_BAD_REQUEST).send('Name required');
         return false
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const result = await pool.query('INSERT INTO "User" (email, password, name, surname) VALUES ($1, $2, $3, $4) RETURNING *', [email, hashedPassword, name, surname]);
+    const result = await pool.query('INSERT INTO "User" (email, password, username) VALUES ($1, $2, $3) RETURNING *', [email, hashedPassword, username]);
 
-    res.status(statusCode.STATUS_CODE_CREATED).json({
-      UID : result.rows[0].id
+    const UID = result.rows[0].id
+
+    res.status(statusCode.STATUS_CODE_OK).json({
+      token: generateToken(UID) ,
+      refesh_token: generateRefreshToken(UID)
     });
-    
     return true
 };
 
@@ -103,7 +105,7 @@ export const logUser = async (req: Request, res: Response):Promise<boolean> => {
     const passwordMatch = await bcrypt.compare(password, hashedPassword);
 
     if (!passwordMatch) {
-        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("Email / Password incorrect");
+        res.status(statusCode.STATUS_CODE_UNAUTHORISED).send("Password incorrect");
         return false
     }
     const UID = userQuery.rows[0].id

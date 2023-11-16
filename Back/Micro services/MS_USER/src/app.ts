@@ -6,12 +6,19 @@ import { checkEmailAdress, checkPassword, checkExistingAccountLogin,checkExistin
 import { getNewToken } from './controller/tokenController';
 import { Pool } from 'pg';
 import { dbConfig } from "./config";
+import cors from 'cors';
 
 const pool = new Pool(dbConfig);
 const app = express();
 const port = 3001;
 
 console.log('Starting USER microservice')
+
+app.use(cors({
+  origin: 'http://localhost:5173',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+}));
 
 app.use(bodyParser.json());
 
@@ -62,5 +69,3 @@ app.post('/refresh', (req, res) => {
 app.listen(port, () => {
   console.log(`MS is running at http://localhost:${port}`);
 });
-
-// Next mettre un token d'utilisation
