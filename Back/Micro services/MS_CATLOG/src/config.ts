@@ -1,5 +1,6 @@
 
 import { load } from 'ts-dotenv';
+import { Sequelize } from 'sequelize-typescript';
 
 const env = load({
   DATABASE_NAME: String,
@@ -9,6 +10,18 @@ const env = load({
   TOKEN_KEY: String,
   REFRESH_TOKEN_KEY: String
 });
+
+const sequelize = new Sequelize({
+  dialect: 'postgres',
+  database: env.DATABASE_NAME,
+  username: 'postgres',
+  password: env.DATABASE_PASSWORD,
+  host: env.DATABASE_HOST,
+  port: env.DATABASE_PORT,
+  models: [__dirname + '/models'], 
+});
+
+export default sequelize;
 
 export const dbConfig = {
   user: 'postgres',

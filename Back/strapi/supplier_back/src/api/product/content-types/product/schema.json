@@ -34,16 +34,21 @@
     "Variant_type_name": {
       "type": "string"
     },
-    "stock_total": {
+    "stock": {
       "type": "integer"
     },
     "main_images": {
-      "allowedTypes": [
-        "images"
-      ],
       "type": "media",
       "multiple": true,
-      "required": true
+      "required": true,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "category": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::category.category"
     }
   }
 }

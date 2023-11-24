@@ -3,15 +3,15 @@ import { pool } from "./database_connection";
 import { statusCode } from "./statusCode";
 import { QueryResult } from "pg";
 import { load } from 'ts-dotenv'
+import { off } from "process";
 
 const env = load({
     HOST: String,
 })
 
-const QUERY_ALL_PRODUCT:string = 'SELECT * from products;'
-const QUERY_ALL_PRODUCT_WITH_IMAGES = 'select p.*, f.formats from products as p join files_related_morphs as frm on frm.related_id = p.id;'
-const QUERY_PRODUCT_BY_ID = (id: string): string => `select p.*, f.formats from products as p join files_related_morphs as frm on frm.related_id = p.id where p.id = ${id};`
-const QUERY_PRODUCT_BY_CATEGORIES = (categories: string[]): string => `select p.*, f.formats from products as p join files_related_morphs as frm on frm.related_id = p.id where p.categories IN (${categories.join(',')});`
+const QUERY_ALL_PRODUCT = (offset: number) =>  `select p.*, f.formats from products as p join files_related_morphs frm on frm.related_id = p.id join files f on f.id = frm.file_id ORDER BY p.created_at LIMIT 20 OFFSET = ${offset};`
+const QUERY_PRODUCT_BY_ID = (id: string): string => `select p.*, f.formats from products as p join files_related_morphs frm on frm.related_id = p.id join files f on f.id = frm.file_id where p.id = ${id};`
+const QUERY_PRODUCT_BY_CATEGORIES = (categories: string[]): string => `select p.*, f.formats from products as p join files_related_morphs frm on frm.related_id = p.id join files f on f.id = frm.file_id where p.categories IN (${categories.join(',')});`
 
 type Product = {
     id: string,
@@ -27,8 +27,19 @@ type Product = {
 
 export const getAllProducts = async (req: Request, res: Response) => {
     try {
+        let offset = 0;
+        if(req.query.offset != undefined) {
+            if(!Number.isInteger(req.query.offset)) {
+                res.status(statusCode.STATUS_CODE_BAD_REQUEST).send({
+                    error: "offset should be an integer"
+                });
+                return;
+            }
+            offset = parseInt(req.query.offset.toString());
+        }
         const productsResponse: Product[] = []
-        const products: QueryResult = await pool.query(QUERY_ALL_PRODUCT_WITH_IMAGES);
+        console.log(QUERY_ALL_PRODUCT(offset));
+        const products: QueryResult = await pool.query(QUERY_ALL_PRODUCT(offset));
         if(products.rowCount != null && products.rowCount > 0) {
             products.rows.forEach(product => {
                 productsResponse.push({
