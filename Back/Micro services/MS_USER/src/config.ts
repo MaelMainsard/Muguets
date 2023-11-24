@@ -1,12 +1,17 @@
-export const dbConfig = {
-  user: 'postgres',
-  database: 'DB_USER',
-  password: 'Mainsard_35',
-  host: '127.0.0.1',
-  port: 5432,
-};
+import { load } from 'ts-dotenv'
 
-export const tokenConfig = {
-  TOKEN_KEY:"pLU2vHUa4LAD7AJRYCHwScTpmXv5bI4aDYZSxJhO4UPYMHlhryKdXClM3J6RYETp",
-  REFRESH_TOKEN_KEY:"D1DGcPbk3DPveit8g32lLM0XHioTSAHl47cvYkM6gt8SdZ2dM0sWCxzmxBQ9FhCc"
+const env = load({
+  DB_USER:String,
+  DB_DATABASE:String,
+  DB_PW:String,
+  DB_HOST:String,
+  DB_PORT:Number
+})
+
+export const dbConfig = {
+  user: env.DB_USER,
+  database: env.DB_DATABASE,
+  password: env.DB_PW,
+  host: env.DB_HOST,
+  port: env.DB_PORT,
 };

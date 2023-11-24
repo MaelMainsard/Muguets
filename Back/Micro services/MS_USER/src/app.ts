@@ -2,8 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 
 import { statusCode } from './controller/statusCode';
-import { checkEmailAdress, checkPassword, checkExistingAccountLogin,checkExistingAccountRegister, addNewUser, logUser} from './controller/userController'
-import { getNewToken } from './controller/tokenController';
+import { checkEmailAdress, checkPassword, checkExistingAccountLogin,checkExistingAccountRegister, addNewUser, logUser, sendResetPassword} from './controller/userController'
+import { getNewToken, verifyEmailConfirmation } from './controller/tokenController';
 import { Pool } from 'pg';
 import { dbConfig } from "./config";
 import cors from 'cors';
@@ -56,7 +56,7 @@ app.post('/login',async (req, res) => {
   }
 });
 
-app.post('/refresh', (req, res) => {
+app.get('/refresh', (req, res) => {
   try {
     if(!getNewToken(req,res)) return
   } catch (error) {
@@ -65,6 +65,33 @@ app.post('/refresh', (req, res) => {
   }
 });
 
+app.get('/email_confirmation', (req, res) => {
+  try {
+    verifyEmailConfirmation(req,res)
+  } catch (error) {
+    console.error(error)
+    res.status(statusCode.STATUS_CODE_ERROR).send(error);
+  }
+});
+
+app.post('/send_reset_password', async (req, res) => {
+  try {
+    if(!await checkExistingAccountLogin(req,res)) return
+    if(!await sendResetPassword(req,res)) return
+  } catch (error) {
+    console.error(error)
+    res.status(statusCode.STATUS_CODE_ERROR).send(error);
+  }
+});
+
+app.post('/reset_password', (req, res) => {
+  try {
+    
+  } catch (error) {
+    console.error(error)
+    res.status(statusCode.STATUS_CODE_ERROR).send(error);
+  }
+});
 
 app.listen(port, () => {
   console.log(`MS is running at http://localhost:${port}`);
