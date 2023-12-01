@@ -3,32 +3,29 @@ import { load } from 'ts-dotenv';
 import { Sequelize } from 'sequelize-typescript';
 
 const env = load({
-  DATABASE_NAME: String,
-  DATABASE_PASSWORD: String,
-  DATABASE_HOST: String,
-  DATABASE_PORT: Number,
+  POSTGRES_USER: String,
+  POSTGRES_PASSWORD: String,
+  POSTGRES_DB: String,
   TOKEN_KEY: String,
   REFRESH_TOKEN_KEY: String
 });
 
 const sequelize = new Sequelize({
   dialect: 'postgres',
-  database: env.DATABASE_NAME,
-  username: 'postgres',
-  password: env.DATABASE_PASSWORD,
-  host: env.DATABASE_HOST,
-  port: env.DATABASE_PORT,
+  database: env.POSTGRES_DB,
+  username: env.POSTGRES_USER,
+  password: env.POSTGRES_PASSWORD,
+  host: env.POSTGRES_DB,
   models: [__dirname + '/models'], 
 });
 
 export default sequelize;
 
 export const dbConfig = {
-  user: 'postgres',
-  database: env.DATABASE_NAME,
-  password: env.DATABASE_PASSWORD,
-  host: env.DATABASE_HOST,
-  port: env.DATABASE_PORT || 5432,
+  user: env.POSTGRES_USER,
+  database: env.POSTGRES_DB,
+  password: env.POSTGRES_PASSWORD,
+  host: env.POSTGRES_DB,
 };
 
 export const tokenConfig = {

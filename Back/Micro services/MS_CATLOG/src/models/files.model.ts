@@ -1,66 +1,70 @@
-import { Table, Column, Model, HasMany, PrimaryKey } from 'sequelize-typescript';
+import { Table, Column, Model, HasMany, PrimaryKey, DataType } from 'sequelize-typescript';
 import { Json } from 'sequelize/types/utils';
+import files_related_morphs from './files_related_morphs.model';
 
-@Table
-export class Files extends Model {    
+@Table({ timestamps: false })
+export default class files extends Model {
     @PrimaryKey
-    @Column
+    @Column({ type: DataType.INTEGER, autoIncrement: true })
     id: number;
 
-    @Column
+    @Column({ type: DataType.STRING })
     name: string;
 
-    @Column
+    @Column({ type: DataType.STRING })
     alternative_text: string;
 
-    @Column
+    @Column({ type: DataType.STRING })
     caption: string;
 
-    @Column
+    @Column({ type: DataType.INTEGER })
     width: number;
 
-    @Column
+    @Column({ type: DataType.INTEGER })
     height: number;
 
-    @Column
+    @Column({ type: DataType.JSON })
     formats: Json;
 
-    @Column
+    @Column({ type: DataType.STRING })
     hash: string;
 
-    @Column
+    @Column({ type: DataType.STRING })
     ext: string;
 
-    @Column
+    @Column({ type: DataType.STRING })
     mime: string;
-    
-    @Column
+
+    @Column({ type: DataType.INTEGER })
     size: number;
 
-    @Column
+    @Column({ type: DataType.STRING })
     url: string;
 
-    @Column
+    @Column({ type: DataType.STRING })
     preview_url: string;
 
-    @Column
+    @Column({ type: DataType.STRING })
     provider: string;
 
-    @Column
+    @Column({ type: DataType.JSON })
     provider_metadata: Json;
 
-    @Column
+    @Column({ type: DataType.STRING })
     folder_path: string;
 
-    @Column
+    @Column({ type: DataType.DATE })
     created_at: Date;
 
-    @Column
+    @Column({ type: DataType.DATE })
     updated_at: Date;
 
-    @Column
+    @Column({ type: DataType.INTEGER })
     created_by_id: number;
 
-    @Column
+    @Column({ type: DataType.INTEGER })
     updated_by_id: number;
+
+    @HasMany(() => files_related_morphs, 'file_id')
+    FilesRelatedMorphs: files_related_morphs[];
 }

@@ -1,28 +1,26 @@
-import { Table, Column, Model, HasMany, PrimaryKey, ForeignKey } from 'sequelize-typescript';
-import { Products } from './products.model';
-import { Categories } from './categories.model';
+import { Table, Column, Model, PrimaryKey, DataType } from 'sequelize-typescript';
 
-@Table
-export class Parent_Categories extends Model {    
+@Table({ timestamps: false })
+export default class parent_Categories extends Model {    
     @PrimaryKey
-    @Column
+    @Column({ type: DataType.INTEGER, autoIncrement: true })
     id: number;
-    
-    @Column
+
+    @Column({ type: DataType.STRING })
     name: string;
 
-    @Column
+    @Column({ type: DataType.DATE })
     created_at: Date;
 
-    @Column
+    @Column({ type: DataType.DATE })
     updated_at: Date;
 
-    @Column
+    @Column({ type: DataType.DATE })
     published_at: Date;
 
-    @Column
+    @Column({ type: DataType.INTEGER })
     created_by_id: number;
 
-    @Column
-    updated_by_id: number;    
+    @Column({ type: DataType.INTEGER })
+    updated_by_id: number;  
 }

@@ -4,6 +4,9 @@ import { statusCode } from "./statusCode";
 import { QueryResult } from "pg";
 import { load } from 'ts-dotenv'
 import { off } from "process";
+import products  from "../models/products.model";
+import files_related_morphs from "../models/files_related_morphs.model";
+import files from "../models/files.model";
 
 const env = load({
     HOST: String,
@@ -26,6 +29,7 @@ type Product = {
 }
 
 export const getAllProducts = async (req: Request, res: Response) => {
+    
     try {
         let offset = 0;
         if(req.query.offset != undefined) {
@@ -38,23 +42,16 @@ export const getAllProducts = async (req: Request, res: Response) => {
             offset = parseInt(req.query.offset.toString());
         }
         const productsResponse: Product[] = []
-        console.log(QUERY_ALL_PRODUCT(offset));
-        const products: QueryResult = await pool.query(QUERY_ALL_PRODUCT(offset));
-        if(products.rowCount != null && products.rowCount > 0) {
-            products.rows.forEach(product => {
-                productsResponse.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    variant_type_name: product.variant_type_name,
-                    stockTotal: product.stockTotal,
-                    created_at: product.created_at,
-                    updated_at: product.updated_at,
-                    published_at: product.published_at,
-                    url_main_image: `http:${env.HOST}:1338`+product.formats.thumbnail.url
-                })
-            })
-            res.status(statusCode.STATUS_CODE_OK).send(productsResponse);
+        const productsReq = await products.findAll({
+            include: [
+                {
+                  model: files,
+                },
+              ],
+        });
+        // const productsReq = await products.findAll();
+        if(productsReq.length > 0) {
+            res.status(statusCode.STATUS_CODE_OK).send(productsReq);
             return
         } else {
             res.status(statusCode.STATUS_CODE_NOT_FOUND).send({

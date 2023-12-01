@@ -1,19 +1,18 @@
-import { Table, Column, Model, HasMany, PrimaryKey, ForeignKey } from 'sequelize-typescript';
-import { Products } from './products.model';
-import { Categories } from './categories.model';
+import { Table, Column, Model, HasMany, PrimaryKey, ForeignKey, DataType } from 'sequelize-typescript';
+import Products from './products.model';
+import Categories from './categories.model';
 
-@Table
-export class Products_category_link extends Model {    
+@Table({ timestamps: false })
+export default class products_category_link extends Model {
     @PrimaryKey
-    @Column
+    @Column({ type: DataType.INTEGER, autoIncrement: true })
     id: number;
 
     @ForeignKey(() => Products)
-    @Column
+    @Column({ type: DataType.INTEGER })
     product_id: number;
 
     @ForeignKey(() => Categories)
-    @Column
+    @Column({ type: DataType.INTEGER })
     category_id: number;
-    
 }
