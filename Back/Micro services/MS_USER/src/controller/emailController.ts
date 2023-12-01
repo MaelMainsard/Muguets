@@ -9,7 +9,7 @@ const env = load({
     MAILING_PORT:Number
 })
 
-export const sendEmail = async (req: Request, template:any): Promise<boolean> => {
+export const sendEmail = async (req: Request, template:any, title:string): Promise<boolean> => {
     const { email } = req.body;
   
     const transporter = nodemailer.createTransport({
@@ -27,7 +27,7 @@ export const sendEmail = async (req: Request, template:any): Promise<boolean> =>
       const info = await transporter.sendMail({
         from: '"MaelCe.fr"<noreply@maelce.fr>',
         to: email,
-        subject: "Confirmation de votre adresse email",
+        subject: title,
         html: template,
         headers: { 'x-myheader': 'MaelCe.fr' },
       });

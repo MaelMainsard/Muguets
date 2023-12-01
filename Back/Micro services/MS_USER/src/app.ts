@@ -1,37 +1,27 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import "reflect-metadata"
 
+import { AppDataSource } from './db/data-source';
 import { statusCode } from './controller/statusCode';
 import { checkEmailAdress, checkPassword, checkExistingAccountLogin,checkExistingAccountRegister, addNewUser, logUser, sendResetPassword} from './controller/userController'
 import { getNewToken, verifyEmailConfirmation } from './controller/tokenController';
-import { Pool } from 'pg';
-import { dbConfig } from "./config";
+import { load } from 'ts-dotenv'
 import cors from 'cors';
 
-const pool = new Pool(dbConfig);
+const env = load({
+  MS_PORT:Number
+})
+
 const app = express();
-const port = 3001;
+
 
 console.log('Starting USER microservice')
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-}));
+AppDataSource.initialize()
 
 app.use(bodyParser.json());
-
-pool.connect((err, client, done) => {
-  if (err) {
-    console.error('Connection error to the database:', err);
-    done();
-  }
-   else {
-    console.log('Successfully connected to the database');
-    done();
-  }
-});
+app.use(cors());
 
 
 app.post('/register', async (req, res) => {
@@ -84,7 +74,7 @@ app.post('/send_reset_password', async (req, res) => {
   }
 });
 
-app.post('/reset_password', (req, res) => {
+app.post('/reset_password', (_req, res) => {
   try {
     
   } catch (error) {
@@ -93,6 +83,6 @@ app.post('/reset_password', (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`MS is running at http://localhost:${port}`);
+app.listen(env.MS_PORT,() => {
+  console.log(`Server is running on http://localhost:${env.MS_PORT}`);
 });

@@ -2,24 +2,23 @@ import jwt from 'jsonwebtoken';
 import { statusCode } from "./statusCode";
 import {Request, Response} from 'express';
 import { load } from 'ts-dotenv'
-import { Pool } from 'pg';
-import { dbConfig } from "../config";
 import { emailSucess } from '../assets/emailConfirmation/succes'
 import { templateError } from '../assets/error'
+
+import { getRepository,DeepPartial  } from 'typeorm';
+import { User } from '../db/entity/User';
 
 const env = load({
     TOKEN_KEY:String,
     REFRESH_TOKEN_KEY:String
 })
 
-const pool = new Pool(dbConfig);
-
 export const generateToken = (UID: string, time: string): string => {
     return jwt.sign({ username: UID }, env.TOKEN_KEY, { expiresIn: time});
 }
   
-export const generateRefreshToken = (user: { username: string }): string => {
-    return jwt.sign({ username: user.username }, env.REFRESH_TOKEN_KEY, { expiresIn: '7d' });
+export const generateRefreshToken = (UID: string ): string => {
+    return jwt.sign({ username: UID }, env.REFRESH_TOKEN_KEY, { expiresIn: '7d' });
 }
 
 export const getNewToken = (req: Request, res: Response):boolean => {
@@ -39,18 +38,30 @@ export const getNewToken = (req: Request, res: Response):boolean => {
     return true
 };
 
-export const verifyEmailConfirmation = (req: Request, res: Response):void => {
-  const token = req.query.token as string;
+export const verifyEmailConfirmation = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const token = req.query.token as string;
 
-  jwt.verify(token, env.TOKEN_KEY, async (err, decoded) => {
+        const decoded = jwt.verify(token, env.TOKEN_KEY) as { username: string }; // Vérifiez et décodez le jeton
 
-    if (err) {
-      return res.status(401).send(templateError);
+        const UID = decoded.username;
+
+        const userRepository = getRepository(User);
+
+        // Utilisez la méthode update de TypeORM
+        const updateResult = await userRepository.update(
+            { uid: UID }, // Critère de recherche
+            { confirmed: true } as  DeepPartial<User> // Utilisez un type assertion ici
+        );
+
+        if (updateResult.affected === 0) {
+            res.status(401).send(templateError);
+            return;
+        }
+
+        res.status(200).send(emailSucess('https://google.fr'));
+    } catch (error) {
+        console.error('Erreur lors de la vérification de la confirmation de l\'e-mail :', error);
+        res.status(500).send('Erreur interne du serveur');
     }
-
-    const UID = (decoded as any).username;
-    await pool.query('UPDATE "User" SET "confirmed" = $1 WHERE "id" = $2 RETURNING *', [true, UID]);
-    return res.status(200).send(emailSucess('https://google.fr'));
-  });
 };
-

@@ -1,4 +1,7 @@
-export const resetConfirmation = (link:string) => `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resetConfirmation = void 0;
+const resetConfirmation = (link) => `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="und" style="font-family:arial, 'helvetica neue', helvetica, sans-serif">
  <head>
   <meta charset="UTF-8">
@@ -218,4 +221,5 @@ a[x-apple-data-detectors] {
   </div>
  </body>
 </html>
-`
+`;
+exports.resetConfirmation = resetConfirmation;

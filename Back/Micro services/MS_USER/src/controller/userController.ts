@@ -1,18 +1,16 @@
-import { dbConfig } from "../config";
-import { Pool } from 'pg';
 import { statusCode } from "./statusCode";
 import {Request, Response} from 'express';
 import bcrypt from 'bcrypt';
 import * as validator from 'validator';
-import * as zxcvbn from 'zxcvbn';
+import * as zxcvbn from '@zxcvbn-ts/core';
 import { generateRefreshToken, generateToken } from "./tokenController";
 
 import { sendEmail } from "./emailController";
 import { emailConfirmation } from '../assets/emailConfirmation/confirmation'
 import { resetConfirmation } from "../assets/passwordReset/resetConfirmation";
 
-
-const pool = new Pool(dbConfig);
+import { getRepository } from 'typeorm';
+import { User } from '../db/entity/User';
 
 export const checkEmailAdress = (req: Request, res: Response):boolean => {
     const { email } = req.body
@@ -39,7 +37,7 @@ export const checkPassword = (req: Request, res: Response):boolean => {
         return false
     }
 
-    const resultat = zxcvbn.default(password);
+    const resultat = zxcvbn.zxcvbn(password);
 
     if(resultat.score < 2){
         res.status(statusCode.STATUS_CODE_BAD_REQUEST).send(`Votre mot de passe n'est pas assez sur (${resultat.score}/4)`)
@@ -49,103 +47,163 @@ export const checkPassword = (req: Request, res: Response):boolean => {
 
 }
 
-export const checkExistingAccountRegister = async (req: Request, res: Response):Promise<boolean> => {
-    const { email } = req.body
+export const checkExistingAccountRegister = async (req: Request, res: Response): Promise<boolean> => {
+  try {
+    const { email } = req.body;
 
-    const existingUser = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
+    // Utilisation de TypeORM pour rechercher un utilisateur existant
+    const userRepository = getRepository(User);
+    const existingUser = await userRepository.findOne({ where: { email: email } });
 
-    if (existingUser.rows.length > 0) {
-        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("Un compte existe déjas avec cette adresse mail, connectez vous :)");
-        return false
+    if (existingUser) {
+      res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("Un compte existe déjà avec cette adresse e-mail, connectez-vous :)");
+      return false;
     }
 
-    return true
+    return true;
+  } catch (error) {
+    console.error('Erreur lors de la vérification du compte existant :', error);
+    res.status(statusCode.STATUS_CODE_ERROR).send('Erreur interne du serveur');
+    return false;
+  }
 };
 
-export const checkExistingAccountLogin = async (req: Request, res: Response):Promise<boolean> => {
-    const { email } = req.body
-
-    const existingUser = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
-
-    if (existingUser.rows.length <= 0) {
-        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("Aucun compte trouvé avec cette adresse mail, inscrivez vous :)");
-        return false
+export const checkExistingAccountLogin = async (req: Request, res: Response): Promise<boolean> => {
+    try {
+      const { email } = req.body;
+  
+      const userRepository = getRepository(User);
+      const existingUser = await userRepository.findOne({ where: { email: email } });
+  
+      if (!existingUser) {
+        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("Aucun compte trouvé avec cette adresse e-mail, inscrivez-vous :)");
+        return false;
+      }
+  
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de la vérification du compte existant :', error);
+      res.status(statusCode.STATUS_CODE_ERROR).send('Erreur interne du serveur');
+      return false;
     }
-
-    return true
 };
 
-export const addNewUser = async (req: Request, res: Response):Promise<boolean> => {
-    const { email, password, username } = req.body
+export const addNewUser = async (req: Request, res: Response): Promise<boolean> => {
+    try {
+        const { email, password, username } = req.body;
 
-    if(!username){
-        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send('Votre nom est necéssaire');
-        return false
+        if (!username) {
+            res.status(statusCode.STATUS_CODE_BAD_REQUEST).send('Votre nom est nécessaire');
+            return false;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Utilisation de TypeORM pour insérer un nouvel utilisateur
+        const userRepository = getRepository(User);
+        const newUser = {
+          email: email,
+          password: hashedPassword,
+          username: username,
+          confirmed: false,
+        }
+        const savedUser = await userRepository.save(newUser);
+
+        const UID = savedUser.uid;
+
+        const confirmationEmailToken = generateToken(UID, '24h');
+        const token = generateToken(UID, '15m');
+
+        const url = `http://127.0.0.1:3001/email_confirmation?token=${confirmationEmailToken}`;
+
+        sendEmail(req, emailConfirmation(username, url), "Confirmation de votre adresse email");
+
+        res.status(statusCode.STATUS_CODE_OK).json({
+            token: token,
+            refresh_token: generateRefreshToken(UID),
+        });
+
+        return true;
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout d\'un nouvel utilisateur :', error);
+        res.status(statusCode.STATUS_CODE_ERROR).send('Erreur interne du serveur');
+        return false;
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const result = await pool.query('INSERT INTO "User" (email, password, username, confirmed) VALUES ($1, $2, $3, $4) RETURNING *', [email, hashedPassword, username, false]);
-
-    const UID = result.rows[0].id
-
-    const confrimation_email_token = generateToken(UID,'24h')
-
-    const token = generateToken(UID,'15m')
-
-    const url = `http://127.0.0.1:3001/email_confirmation?token=${confrimation_email_token}`
-
-    sendEmail(req,emailConfirmation(username,url))
-
-    res.status(statusCode.STATUS_CODE_OK).json({
-      token: token,
-      refesh_token: generateRefreshToken(UID)
-    });
-    return true
 };
 
-export const logUser = async (req: Request, res: Response):Promise<boolean> => {
-    const { email, password } = req.body
-    console.log(process.env.TEST);
-    if(!email || !password){
-        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("l'email et le mot de passe sont requis");
-        return false
+export const logUser = async (req: Request, res: Response): Promise<boolean> => {
+    try {
+      const { email, password } = req.body;
+  
+      console.log(process.env.TEST);
+  
+      if (!email || !password) {
+        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("L'e-mail et le mot de passe sont requis");
+        return false;
+      }
+  
+      const userRepository = getRepository(User);
+      const userQuery = await userRepository.findOne({
+        where: { email: email },
+      });
+  
+      if (!userQuery) {
+        res.status(statusCode.STATUS_CODE_UNAUTHORISED).send("Votre e-mail / mot de passe n'est pas correct");
+        return false;
+      }
+  
+      const hashedPassword = userQuery.password;
+      const passwordMatch = await bcrypt.compare(password, hashedPassword);
+  
+      if (!passwordMatch) {
+        res.status(statusCode.STATUS_CODE_UNAUTHORISED).send("Votre e-mail / mot de passe n'est pas correct");
+        return false;
+      }
+  
+      const UID = userQuery.uid;
+      
+  
+      res.status(statusCode.STATUS_CODE_OK).json({
+        token: generateToken(UID, '15m'),
+        refresh_token: generateRefreshToken(UID),
+      });
+  
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de la connexion de l\'utilisateur :', error);
+      res.status(statusCode.STATUS_CODE_ERROR).send('Erreur interne du serveur');
+      return false;
     }
+};
 
-    const userQuery = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
-
-    const hashedPassword = userQuery.rows[0].password;
-    const passwordMatch = await bcrypt.compare(password, hashedPassword);
-
-    if (!passwordMatch) {
-        res.status(statusCode.STATUS_CODE_UNAUTHORISED).send("Votre email / mot de passe n'est pas correct");
-        return false
+export const sendResetPassword = async (req: Request, res: Response): Promise<boolean> => {
+    try {
+      const { email } = req.body;
+  
+      const userRepository = getRepository(User);
+      const userQuery = await userRepository.findOne({
+        where: { email: email },
+      });
+  
+      if (!userQuery) {
+        res.status(statusCode.STATUS_CODE_BAD_REQUEST).send("Aucun utilisateur trouvé avec cet e-mail");
+        return false;
+      }
+  
+      const UID = userQuery.uid;
+  
+      const token = generateToken(UID, '1H');
+  
+      const url = `http://127.0.0.1:3001/reset_password?token=${token}`;
+  
+      sendEmail(req, resetConfirmation(url), "Réinitialisez votre mot de passe");
+  
+      res.status(statusCode.STATUS_CODE_OK).send('OK');
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de la réinitialisation de mot de passe :', error);
+      res.status(statusCode.STATUS_CODE_ERROR).send('Erreur interne du serveur');
+      return false;
     }
-    const UID = userQuery.rows[0].id
-
-    res.status(statusCode.STATUS_CODE_OK).json({
-      token: generateToken(UID,'15m') ,
-      refesh_token: generateRefreshToken(UID)
-    });
-    
-    return true
 };
-
-export const sendResetPassword = async (req: Request, res: Response):Promise<boolean> => {
-    const { email } = req.body
-
-    const userQuery = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
-
-    const UID = userQuery.rows[0].id
-
-    const token = generateToken(UID,'1H')
-
-    const url = `http://127.0.0.1:3001/reset_password?token=${token}`
-
-    sendEmail(req,resetConfirmation(url))
-
-    return true
-
-};
-
 
