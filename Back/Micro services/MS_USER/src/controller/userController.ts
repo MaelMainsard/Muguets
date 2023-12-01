@@ -2,15 +2,20 @@ import { statusCode } from "./statusCode";
 import {Request, Response} from 'express';
 import bcrypt from 'bcrypt';
 import * as validator from 'validator';
-import * as zxcvbn from '@zxcvbn-ts/core';
+import zxcvbn from 'zxcvbn';
 import { generateRefreshToken, generateToken } from "./tokenController";
+import { load } from 'ts-dotenv'
 
 import { sendEmail } from "./emailController";
 import { emailConfirmation } from '../assets/emailConfirmation/confirmation'
 import { resetConfirmation } from "../assets/passwordReset/resetConfirmation";
 
-import { getRepository } from 'typeorm';
-import { User } from '../db/entity/User';
+import { AppDataSource } from "../db/data-source"
+import { User } from "../db/entity/User"
+
+const env = load({
+  MS_PORT:Number,
+})
 
 export const checkEmailAdress = (req: Request, res: Response):boolean => {
     const { email } = req.body
@@ -37,7 +42,7 @@ export const checkPassword = (req: Request, res: Response):boolean => {
         return false
     }
 
-    const resultat = zxcvbn.zxcvbn(password);
+    const resultat = zxcvbn(password);
 
     if(resultat.score < 2){
         res.status(statusCode.STATUS_CODE_BAD_REQUEST).send(`Votre mot de passe n'est pas assez sur (${resultat.score}/4)`)
@@ -51,8 +56,8 @@ export const checkExistingAccountRegister = async (req: Request, res: Response):
   try {
     const { email } = req.body;
 
-    // Utilisation de TypeORM pour rechercher un utilisateur existant
-    const userRepository = getRepository(User);
+    const userRepository = AppDataSource.getRepository(User);
+
     const existingUser = await userRepository.findOne({ where: { email: email } });
 
     if (existingUser) {
@@ -72,7 +77,7 @@ export const checkExistingAccountLogin = async (req: Request, res: Response): Pr
     try {
       const { email } = req.body;
   
-      const userRepository = getRepository(User);
+      const userRepository = AppDataSource.getRepository(User);
       const existingUser = await userRepository.findOne({ where: { email: email } });
   
       if (!existingUser) {
@@ -100,7 +105,7 @@ export const addNewUser = async (req: Request, res: Response): Promise<boolean> 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Utilisation de TypeORM pour insérer un nouvel utilisateur
-        const userRepository = getRepository(User);
+        const userRepository = AppDataSource.getRepository(User);
         const newUser = {
           email: email,
           password: hashedPassword,
@@ -114,7 +119,7 @@ export const addNewUser = async (req: Request, res: Response): Promise<boolean> 
         const confirmationEmailToken = generateToken(UID, '24h');
         const token = generateToken(UID, '15m');
 
-        const url = `http://127.0.0.1:3001/email_confirmation?token=${confirmationEmailToken}`;
+        const url = `http://127.0.0.1:${env.MS_PORT}/email_confirmation?token=${confirmationEmailToken}`;
 
         sendEmail(req, emailConfirmation(username, url), "Confirmation de votre adresse email");
 
@@ -142,7 +147,7 @@ export const logUser = async (req: Request, res: Response): Promise<boolean> => 
         return false;
       }
   
-      const userRepository = getRepository(User);
+      const userRepository = AppDataSource.getRepository(User);
       const userQuery = await userRepository.findOne({
         where: { email: email },
       });
@@ -180,7 +185,7 @@ export const sendResetPassword = async (req: Request, res: Response): Promise<bo
     try {
       const { email } = req.body;
   
-      const userRepository = getRepository(User);
+      const userRepository = AppDataSource.getRepository(User);
       const userQuery = await userRepository.findOne({
         where: { email: email },
       });

@@ -5,8 +5,9 @@ import { load } from 'ts-dotenv'
 import { emailSucess } from '../assets/emailConfirmation/succes'
 import { templateError } from '../assets/error'
 
-import { getRepository,DeepPartial  } from 'typeorm';
-import { User } from '../db/entity/User';
+
+import { AppDataSource } from "../db/data-source"
+import { User } from "../db/entity/User"
 
 const env = load({
     TOKEN_KEY:String,
@@ -42,23 +43,39 @@ export const verifyEmailConfirmation = async (req: Request, res: Response): Prom
     try {
         const token = req.query.token as string;
 
-        const decoded = jwt.verify(token, env.TOKEN_KEY) as { username: string }; // Vérifiez et décodez le jeton
+        let decoded;
 
-        const UID = decoded.username;
-
-        const userRepository = getRepository(User);
-
-        // Utilisez la méthode update de TypeORM
-        const updateResult = await userRepository.update(
-            { uid: UID }, // Critère de recherche
-            { confirmed: true } as  DeepPartial<User> // Utilisez un type assertion ici
-        );
-
-        if (updateResult.affected === 0) {
+        try {
+            decoded = jwt.verify(token, env.TOKEN_KEY) as { username: string }; // Vérifiez et décodez le jeton
+        } catch (tokenError) {
+            console.error('Erreur de vérification du jeton :', tokenError);
             res.status(401).send(templateError);
             return;
         }
 
+        const UID = decoded.username;
+
+        const userRepository = AppDataSource.getRepository(User);
+
+        const updateUser = await userRepository.findOneBy({
+            uid: UID,
+        });
+
+        if (!updateUser) {
+            console.error('Utilisateur non trouvé pour UID :', UID);
+            res.status(404).send(templateError); // Peut-être ajuster le code d'état en fonction de vos besoins
+            return;
+        }
+
+        updateUser.confirmed = true;
+
+        const savedUser = await userRepository.save(updateUser);
+
+        if (!savedUser || savedUser.uid !== UID || !savedUser.confirmed) {
+            console.error('La mise à jour n\'a pas été effectuée avec succès pour UID :', UID);
+            res.status(401).send(templateError);
+            return;
+        }
         res.status(200).send(emailSucess('https://google.fr'));
     } catch (error) {
         console.error('Erreur lors de la vérification de la confirmation de l\'e-mail :', error);

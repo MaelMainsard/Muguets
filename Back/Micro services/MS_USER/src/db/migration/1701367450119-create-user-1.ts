@@ -10,7 +10,7 @@ export class CreateUser11701367450119 implements MigrationInterface {
                     type: 'uuid',
                     isPrimary: true,
                     generationStrategy: 'uuid',
-                    default: 'uuid_generate_v4()',
+                    default: 'gen_random_uuid ()',
                 },
                 {
                     name: 'username',
@@ -29,7 +29,7 @@ export class CreateUser11701367450119 implements MigrationInterface {
                     isNullable: false,
                 },
                 {
-                    name: 'address',
+                    name: 'adress',
                     type: 'varchar',
                     isNullable: true,
                 },
@@ -42,6 +42,12 @@ export class CreateUser11701367450119 implements MigrationInterface {
                     name: 'createdAt',
                     type: 'timestamp',
                     default: 'CURRENT_TIMESTAMP',
+                },
+                {
+                    name: 'confirmed',
+                    type: 'boolean',
+                    isNullable: false,
+                    default: false,
                 },
             ],
         }));

@@ -4,10 +4,10 @@ import { User } from './User'; // Assurez-vous de spécifier le chemin correct v
 @Entity('Wallets')
 export class Wallet {
 
-    @PrimaryColumn('uuid')
+    @Column('uuid')
     userUid!: string;
 
-    @PrimaryColumn({ type: 'varchar', nullable: false, default: 'DEFAULT' })
+    @PrimaryColumn({ type: 'varchar', nullable: false})
     cardName?: string;
 
     @Column({ type: 'varchar', nullable: false })

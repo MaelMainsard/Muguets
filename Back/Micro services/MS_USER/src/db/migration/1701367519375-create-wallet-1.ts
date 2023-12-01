@@ -8,13 +8,12 @@ export class CreateWallet11701367519375 implements MigrationInterface {
                 {
                     name: 'userUid',
                     type: 'uuid',
-                    isPrimary: true,
+                    isNullable: false,
                 },
                 {
                     name: 'cardName',
                     type: 'varchar',
                     isPrimary: true,
-                    default: 'DEFAULT',
                 },
                 {
                     name: 'cardNumber',

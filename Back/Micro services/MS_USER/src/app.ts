@@ -8,6 +8,7 @@ import { checkEmailAdress, checkPassword, checkExistingAccountLogin,checkExistin
 import { getNewToken, verifyEmailConfirmation } from './controller/tokenController';
 import { load } from 'ts-dotenv'
 import cors from 'cors';
+import { seedUsers } from './db/seeder/seed-user';
 
 const env = load({
   MS_PORT:Number
@@ -18,7 +19,6 @@ const app = express();
 
 console.log('Starting USER microservice')
 
-AppDataSource.initialize()
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -83,6 +83,10 @@ app.post('/reset_password', (_req, res) => {
   }
 });
 
-app.listen(env.MS_PORT,() => {
-  console.log(`Server is running on http://localhost:${env.MS_PORT}`);
-});
+
+AppDataSource.initialize().then(() => {
+  seedUsers()
+  app.listen(env.MS_PORT,() => {
+    console.log(`Server is running on http://localhost:${env.MS_PORT}`);
+  });
+}).catch(error => console.log(error));

@@ -21,6 +21,9 @@ export class User {
     @Column({ type: 'varchar', nullable: true })
     phone?: string;
 
+    @Column({ type: 'boolean', nullable: true })
+    confirmed?: boolean;
+
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt!: Date;
 

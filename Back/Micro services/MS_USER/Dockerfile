@@ -6,8 +6,7 @@ WORKDIR /usr/src/app
 
 # Copie les fichiers nécessaires dans le conteneur
 COPY ./package.json ./
-COPY ./tsConfig.json ./
-COPY ./tsconfig.app.json ./
+COPY ./tsconfig.json ./
 COPY ./src ./src
 
 RUN ls -al
