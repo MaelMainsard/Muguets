@@ -55,7 +55,7 @@
   <script setup lang="ts">
   
   import axios from 'axios';
-  import { reactive } from 'vue';
+  import { type Ref, reactive, ref } from 'vue';
   
   const errorMessage:Ref<string> = ref('');
   
@@ -105,11 +105,14 @@
       
       const response = await axios.post(url, params);
       const tokens:ResParams = response.data;
+
+      errorMessage.value = ''
       
       localStorage.setItem('maelce-token', tokens.token);
       localStorage.setItem('maelce-refresh-token', tokens.refresh_token);
+
+      window.location.href = 'http://127.0.0.1:3000/';
   
-      errorMessage.value = ''
     } catch (error: any) {
       errorMessage.value = error.response.data;
     }

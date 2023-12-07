@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: FRONT_CATALOG
+    ports:
+      - "4692:3000"
+    expose:
+      - "4692"
+
+
+

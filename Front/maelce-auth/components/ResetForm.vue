@@ -30,7 +30,7 @@
   <script setup lang="ts">
   
   import axios from 'axios';
-  import { reactive } from 'vue';
+  import { type Ref, reactive, ref } from 'vue';
   
   const errorMessage:Ref<string> = ref('');
   const responseMessage:Ref<string> = ref('');

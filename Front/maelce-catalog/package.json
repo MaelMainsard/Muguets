@@ -1,6 +1,5 @@
 {
-  "name": "maelce-authentification",
-  "version": "V1.0.1",
+  "name": "nuxt-app",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,23 +7,16 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "start": "nuxt start"
+    "postinstall": "nuxt prepare"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
-    "@nuxt/types": "^2.17.2",
     "@nuxtjs/tailwindcss": "^6.10.1",
-    "autoprefixer": "^10.4.16",
     "nuxt": "^3.8.2",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6",
-    "vue": "^3.3.8",
+    "vue": "^3.3.10",
     "vue-router": "^4.2.5"
   },
   "dependencies": {
-    "@types/axios": "^0.14.0",
-    "axios": "^1.6.2",
-    "nuxt-icons": "^3.2.1"
+    "typescript": "^5.3.3"
   }
 }
