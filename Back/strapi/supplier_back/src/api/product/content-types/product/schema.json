@@ -12,12 +12,6 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "Variant": {
-      "displayName": "Variant product",
-      "type": "component",
-      "repeatable": true,
-      "component": "variant-product.variant-product"
-    },
     "name": {
       "type": "string",
       "required": true
@@ -30,9 +24,6 @@
     "price": {
       "required": true,
       "type": "decimal"
-    },
-    "Variant_type_name": {
-      "type": "string"
     },
     "stock": {
       "type": "integer"

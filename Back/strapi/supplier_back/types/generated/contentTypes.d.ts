@@ -797,7 +797,6 @@ export interface ApiProductProduct extends Schema.CollectionType {
     draftAndPublish: true;
   };
   attributes: {
-    Variant: Attribute.Component<'variant-product.variant-product', true>;
     name: Attribute.String & Attribute.Required;
     supplier: Attribute.Relation<
       'api::product.product',
@@ -805,7 +804,6 @@ export interface ApiProductProduct extends Schema.CollectionType {
       'api::supplier.supplier'
     >;
     price: Attribute.Decimal & Attribute.Required;
-    Variant_type_name: Attribute.String;
     stock: Attribute.Integer;
     main_images: Attribute.Media & Attribute.Required;
     category: Attribute.Relation<
