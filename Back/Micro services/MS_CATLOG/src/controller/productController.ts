@@ -94,7 +94,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
 
 export const getProductByID = async (req: Request, res: Response) => {
     try {
-        const idProduct = req.params.id
+        const idProduct = req.params.id;
         const productReq = await products.findByPk(idProduct, {include: [
             {
               model: files,

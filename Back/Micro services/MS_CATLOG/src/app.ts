@@ -6,6 +6,7 @@ import cors from 'cors';
 import ProductsRoute from './routes/productsRoute';
 import CategoriesRoute from './routes/categoriesRoute';
 import SuppliersRoute from './routes/suppliersRoute';
+import ParentCategoriesRoute from './routes/parent_categoriesRoute'
 
 const env = load({
   API_PORT: String, 
@@ -30,4 +31,5 @@ app.listen(port, () => {
 app.use(`/${API_VERSION}/products`, ProductsRoute);
 app.use(`/${API_VERSION}/categories`, CategoriesRoute);
 app.use(`/${API_VERSION}/suppliers`, SuppliersRoute);
+app.use(`/${API_VERSION}/parent-categories`, ParentCategoriesRoute);
 
