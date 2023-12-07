@@ -166,10 +166,13 @@ export const logUser = async (req: Request, res: Response): Promise<boolean> => 
       }
   
       const UID = userQuery.uid;
+      const token = generateToken(UID, '15m');
+
+      console.log(token);
       
   
       res.status(statusCode.STATUS_CODE_OK).json({
-        token: generateToken(UID, '15m'),
+        token: token,
         refresh_token: generateRefreshToken(UID),
       });
   

@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white shadow-lg h-fit flex flex-col p-8 items-center w-fit max-w-xs">
 
-    <img class="rounded-full w-16 mb-3" src="https://urlz.fr/oOFT"/>
+    <img class="rounded-full w-16 mb-3" src="/logo-maelce.jpg"/>
 
     <span class="mb-6 font-sans text-xl font-semibold justify-center items-center">Inscrivez-vous</span>
 
@@ -101,6 +101,7 @@
       password: formData.password,
     };
   
+    // Mettre dans he headers les tokens
     try {
       
       const response = await axios.post(url, params);
@@ -111,7 +112,8 @@
       localStorage.setItem('maelce-token', tokens.token);
       localStorage.setItem('maelce-refresh-token', tokens.refresh_token);
 
-      window.location.href = 'http://127.0.0.1:3000/';
+
+      window.location.href = 'http://localhost:3000/';
   
     } catch (error: any) {
       errorMessage.value = error.response.data;

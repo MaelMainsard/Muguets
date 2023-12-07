@@ -5,7 +5,7 @@ import "reflect-metadata"
 import { AppDataSource } from './db/data-source';
 import { statusCode } from './controller/statusCode';
 import { checkEmailAdress, checkPassword, checkExistingAccountLogin,checkExistingAccountRegister, addNewUser, logUser, sendResetPassword} from './controller/userController'
-import { getNewToken, verifyEmailConfirmation } from './controller/tokenController';
+import { getNewToken, verifyEmailConfirmation, verifyToken } from './controller/tokenController';
 import { load } from 'ts-dotenv'
 import cors from 'cors';
 import { seedUsers } from './db/seeder/seed-user';
@@ -40,6 +40,15 @@ app.post('/login',async (req, res) => {
   try {
     if(!await checkExistingAccountLogin(req,res)) return
     if(!await logUser(req,res)) return
+  } catch (error) {
+    console.error(error)
+    res.status(statusCode.STATUS_CODE_ERROR).send(error);
+  }
+});
+
+app.post('/verify_token',async (req, res) => {
+  try {
+    if(!verifyToken(req,res)) return
   } catch (error) {
     console.error(error)
     res.status(statusCode.STATUS_CODE_ERROR).send(error);

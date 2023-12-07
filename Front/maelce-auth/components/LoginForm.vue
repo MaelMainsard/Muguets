@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white shadow-lg h-fit flex flex-col p-8 items-center w-fit max-w-xs">
 
-    <img class="rounded-full w-16 mb-3" src="https://urlz.fr/oOFT"/>
+    <img class="rounded-full w-16 mb-3" src="/logo-maelce.jpg"/>
 
     <span class="mb-6 font-sans text-xl font-semibold justify-center items-center">Connectez-vous</span>
 
@@ -39,16 +39,15 @@
 import axios from 'axios';
 import { type Ref, reactive, ref } from 'vue';
 
-const errorMessage:Ref<string> = ref('');
+const errorMessage: Ref<string> = ref('');
 
 const formData = reactive({
   email: '',
   password: '',
 });
 
-
 const submitForm = async () => {
-  const url:string = 'http://127.0.0.1:4686/login';
+  const url: string = 'http://127.0.0.1:4686/login';
 
   if (formData.email === '' || formData.password === '') {
     errorMessage.value = 'Veuillez renseigner votre adresse mail et votre mot de passe';
@@ -58,33 +57,37 @@ const submitForm = async () => {
   type ReqParams = {
     email: string,
     password: string,
-  }
+  };
 
   type ResParams = {
     refresh_token: string,
     token: string,
-  }
+  };
 
-  const params:ReqParams = {
+  const params: ReqParams = {
     email: formData.email,
     password: formData.password,
   };
 
   try {
-    
     const response = await axios.post(url, params);
-    const tokens:ResParams = response.data;
 
-    errorMessage.value = ''
-    
-    localStorage.setItem('maelce-token', tokens.token);
-    localStorage.setItem('maelce-refresh-token', tokens.refresh_token);
+    errorMessage.value = '';
 
-    window.location.href = 'http://127.0.0.1:3000/';
+    // Utilisation du Cache Storage API au lieu de localStorage
+    const cache = await caches.open('maelce-cache');
+    const cacheData: ResParams = {
+      refresh_token: response.data.refresh_token,
+      token: response.data.token,
+    };
+    const cacheResponse = new Response(JSON.stringify(cacheData));
+    await cache.put('maelce-token', cacheResponse);
 
+    // Redirection vers la page d'accueil
+    window.location.href = 'http://localhost:3000/';
   } catch (error: any) {
     errorMessage.value = error.response.data;
   }
-
 };
+
 </script>

@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 # Copie les fichiers nécessaires dans le conteneur
 COPY ./assets ./assets
-COPY ./src ./components
+COPY ./components ./components
 COPY ./pages ./pages
 COPY ./public ./public
 COPY ./server ./server

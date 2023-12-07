@@ -17,6 +17,28 @@ const env = load({
 export const generateToken = (UID: string, time: string): string => {
     return jwt.sign({ username: UID }, env.TOKEN_KEY, { expiresIn: time});
 }
+export const verifyToken = (req: Request, res: Response): boolean => {
+    try {
+        const token:string = req.body.token
+
+        console.log(token)
+
+        jwt.verify(token, env.TOKEN_KEY, (err, decoded) => {
+            console.log(err)
+            console.log(decoded)
+            if (err) {
+              res.send(false);
+              return false;
+            } else {
+              res.send(true);
+              return true;
+            }
+        });
+    } catch (err) {
+        res.send(false);
+        return false;
+    }
+}
   
 export const generateRefreshToken = (UID: string ): string => {
     return jwt.sign({ username: UID }, env.REFRESH_TOKEN_KEY, { expiresIn: '7d' });
