@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "parent_categories",
+  "info": {
+    "singularName": "parent-category",
+    "pluralName": "parent-categories",
+    "displayName": "Parent_Category"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}
