@@ -1,5 +1,8 @@
-import { Table, Column, Model, HasMany, PrimaryKey, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, HasMany, PrimaryKey, DataType, BelongsTo, BelongsToAssociation } from 'sequelize-typescript';
 import files_related_morphs from './files_related_morphs.model';
+
+import parent_categories from './parent_categories.model';
+import categories_parent_category_link from './categories_parent_category_link.model';
 
 @Table({ timestamps: false })
 export default class categories extends Model {    
@@ -24,5 +27,8 @@ export default class categories extends Model {
 
     @Column({ type: DataType.INTEGER })
     updated_by_id: number;
+
+    @BelongsTo(() => categories_parent_category_link, { foreignKey: 'id' })
+    categoryLink: categories_parent_category_link;
 
 }

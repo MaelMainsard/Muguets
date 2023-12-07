@@ -1,7 +1,8 @@
-import { Table, Column, Model, PrimaryKey, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, PrimaryKey, DataType, HasMany } from 'sequelize-typescript';
+import categories_parent_category_link from './categories_parent_category_link.model';
 
 @Table({ timestamps: false })
-export default class parent_Categories extends Model {    
+export default class parent_categories extends Model {    
     @PrimaryKey
     @Column({ type: DataType.INTEGER, autoIncrement: true })
     id: number;
@@ -23,4 +24,7 @@ export default class parent_Categories extends Model {
 
     @Column({ type: DataType.INTEGER })
     updated_by_id: number;  
+
+    @HasMany(() => categories_parent_category_link)
+    categories_daughter: categories_parent_category_link[];
 }

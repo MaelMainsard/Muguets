@@ -25,4 +25,6 @@ export default class files_related_morphs extends Model {
 
     @Column({ type: DataType.INTEGER })
     order: number;
+
+    
 }

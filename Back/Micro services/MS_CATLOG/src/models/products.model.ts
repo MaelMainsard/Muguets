@@ -1,6 +1,8 @@
-import { Table, Column, Model, HasMany, PrimaryKey, DataType, BelongsToMany } from 'sequelize-typescript';
+import { Table, Column, Model, HasMany, PrimaryKey, BelongsTo, DataType, BelongsToMany } from 'sequelize-typescript';
 import files_related_morphs from './files_related_morphs.model';
 import files from './files.model';
+import products_category_link from './products_category_link.model';
+import categories from './categories.model';
 
 @Table({ timestamps: false })
 export default class products extends Model {
@@ -29,9 +31,6 @@ export default class products extends Model {
     @Column({ type: DataType.DECIMAL(10, 2) })
     price: number;
 
-    @Column({ type: DataType.STRING })
-    variant_type_name: string;
-
     @Column({ type: DataType.INTEGER })
     stock: number;
 
@@ -40,4 +39,10 @@ export default class products extends Model {
 
     @BelongsToMany(() => files, () => files_related_morphs, 'related_id', 'file_id')
     Files: files[];
+
+    @BelongsTo(() => products_category_link, { foreignKey: 'id' })
+    categoryLink: products_category_link;
+
+    @BelongsToMany(() => categories, () => products_category_link, 'product_id', 'category_id')
+    categoryRelated: products_category_link[];
 }

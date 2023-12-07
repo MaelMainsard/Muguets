@@ -1,6 +1,7 @@
-import { Table, Column, Model, HasMany, PrimaryKey, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, HasMany, PrimaryKey, DataType, BelongsToMany } from 'sequelize-typescript';
 import { Json } from 'sequelize/types/utils';
 import files_related_morphs from './files_related_morphs.model';
+import products from './products.model';
 
 @Table({ timestamps: false })
 export default class files extends Model {
@@ -67,4 +68,7 @@ export default class files extends Model {
 
     @HasMany(() => files_related_morphs, 'file_id')
     FilesRelatedMorphs: files_related_morphs[];
+
+    @BelongsToMany(() => products, () => files_related_morphs, 'file_id', 'related_id')
+    Products: products[];
 }
