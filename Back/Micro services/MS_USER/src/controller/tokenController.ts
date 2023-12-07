@@ -98,7 +98,7 @@ export const verifyEmailConfirmation = async (req: Request, res: Response): Prom
             res.status(401).send(templateError);
             return;
         }
-        res.status(200).send(emailSucess('https://google.fr'));
+        res.status(200).send(emailSucess('http://127.0.0.1:4692'));
     } catch (error) {
         console.error('Erreur lors de la vérification de la confirmation de l\'e-mail :', error);
         res.status(500).send('Erreur interne du serveur');

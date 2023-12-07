@@ -12,12 +12,12 @@ export default defineNuxtConfig({
         {
           name: 'home',
           path: '/',
-          file: '/pages/home.vue'
+          file: '/pages/Home.vue'
         },
         {
           name: 'cart',
           path: '/cart',
-          file: '/pages/cart.vue'
+          file: '/pages/Cart.vue'
         }
       )
     }

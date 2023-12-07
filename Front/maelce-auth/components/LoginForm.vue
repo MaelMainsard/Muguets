@@ -84,7 +84,7 @@ const submitForm = async () => {
     await cache.put('maelce-token', cacheResponse);
 
     // Redirection vers la page d'accueil
-    window.location.href = 'http://localhost:3000/';
+    window.location.href = 'http://127.0.0.1:4692/';
   } catch (error: any) {
     errorMessage.value = error.response.data;
   }
