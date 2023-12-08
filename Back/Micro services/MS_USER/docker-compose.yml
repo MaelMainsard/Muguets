@@ -7,7 +7,7 @@ services:
     ports: 
       - 4684:5432
     volumes:
-      - ~/apps/postgresql:/var/lib/postgresql/data
+      - ~/apps/postgresql-user:/var/lib/postgresql/data
     env_file:
       - ./.env
     networks:
