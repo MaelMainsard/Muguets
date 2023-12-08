@@ -18,7 +18,7 @@
     "parent_category": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::category.category"
+      "target": "api::parent-category.parent-category"
     }
   }
 }

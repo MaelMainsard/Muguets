@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: DB_USER
+    ports: 
+      - 4684:5432
+    volumes:
+      - ~/apps/postgresql-user:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+    networks:
+      - app_network
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: MS_USER
+    ports:
+      - "4686:4686"
+    env_file:
+      - ./.env
+    expose:
+      - "4686"
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
+
+networks:
+  app_network:
+    driver: bridge
+   
+
+

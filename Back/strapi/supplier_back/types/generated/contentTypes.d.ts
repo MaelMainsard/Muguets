@@ -693,7 +693,7 @@ export interface ApiCategoryCategory extends Schema.CollectionType {
     parent_category: Attribute.Relation<
       'api::category.category',
       'oneToOne',
-      'api::category.category'
+      'api::parent-category.parent-category'
     >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
@@ -713,6 +713,78 @@ export interface ApiCategoryCategory extends Schema.CollectionType {
   };
 }
 
+export interface ApiNoticeNotice extends Schema.CollectionType {
+  collectionName: 'notices';
+  info: {
+    singularName: 'notice';
+    pluralName: 'notices';
+    displayName: 'Notice';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    product: Attribute.Relation<
+      'api::notice.notice',
+      'oneToOne',
+      'api::product.product'
+    >;
+    idUser: Attribute.String;
+    opinion: Attribute.Text;
+    score: Attribute.Integer &
+      Attribute.Required &
+      Attribute.SetMinMax<{
+        min: 0;
+        max: 5;
+      }>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::notice.notice',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::notice.notice',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiParentCategoryParentCategory extends Schema.CollectionType {
+  collectionName: 'parent_categories';
+  info: {
+    singularName: 'parent-category';
+    pluralName: 'parent-categories';
+    displayName: 'Parent_Category';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    name: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::parent-category.parent-category',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::parent-category.parent-category',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiProductProduct extends Schema.CollectionType {
   collectionName: 'products';
   info: {
@@ -725,7 +797,6 @@ export interface ApiProductProduct extends Schema.CollectionType {
     draftAndPublish: true;
   };
   attributes: {
-    Variant: Attribute.Component<'variant-product.variant-product', true>;
     name: Attribute.String & Attribute.Required;
     supplier: Attribute.Relation<
       'api::product.product',
@@ -733,9 +804,13 @@ export interface ApiProductProduct extends Schema.CollectionType {
       'api::supplier.supplier'
     >;
     price: Attribute.Decimal & Attribute.Required;
-    Variant_type_name: Attribute.String;
-    stock_total: Attribute.Integer;
+    stock: Attribute.Integer;
     main_images: Attribute.Media & Attribute.Required;
+    category: Attribute.Relation<
+      'api::product.product',
+      'oneToOne',
+      'api::category.category'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -801,6 +876,8 @@ declare module '@strapi/types' {
       'plugin::users-permissions.role': PluginUsersPermissionsRole;
       'plugin::users-permissions.user': PluginUsersPermissionsUser;
       'api::category.category': ApiCategoryCategory;
+      'api::notice.notice': ApiNoticeNotice;
+      'api::parent-category.parent-category': ApiParentCategoryParentCategory;
       'api::product.product': ApiProductProduct;
       'api::supplier.supplier': ApiSupplierSupplier;
     }
