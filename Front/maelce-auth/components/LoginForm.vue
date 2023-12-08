@@ -74,17 +74,13 @@ const submitForm = async () => {
 
     errorMessage.value = '';
 
-    // Utilisation du Cache Storage API au lieu de localStorage
-    const cache = await caches.open('maelce-cache');
-    const cacheData: ResParams = {
-      refresh_token: response.data.refresh_token,
-      token: response.data.token,
-    };
-    const cacheResponse = new Response(JSON.stringify(cacheData));
-    await cache.put('maelce-token', cacheResponse);
+    const accessToken = response.data.token
+    const refreshToken = response.data.refresh_token
 
-    // Redirection vers la page d'accueil
-    window.location.href = 'http://127.0.0.1:4692/';
+    const redirectUrl = `http://127.0.0.1:4692/?token=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`;
+
+    window.location.href = redirectUrl
+
   } catch (error: any) {
     errorMessage.value = error.response.data;
   }

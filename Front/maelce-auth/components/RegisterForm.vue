@@ -105,15 +105,15 @@
     try {
       
       const response = await axios.post(url, params);
-      const tokens:ResParams = response.data;
 
       errorMessage.value = ''
-      
-      localStorage.setItem('maelce-token', tokens.token);
-      localStorage.setItem('maelce-refresh-token', tokens.refresh_token);
 
+      const accessToken = response.data.token
+      const refreshToken = response.data.refresh_token
 
-      window.location.href = 'http://127.0.0.1:4692/';
+      const redirectUrl = `http://127.0.0.1:4692/?token=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`;
+
+      window.location.href = redirectUrl
   
     } catch (error: any) {
       errorMessage.value = error.response.data;

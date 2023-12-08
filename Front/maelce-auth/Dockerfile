@@ -14,7 +14,6 @@ COPY ./nuxt.config.ts ./
 COPY ./package.json ./
 COPY ./tailwind.config.js ./
 COPY ./tsconfig.json ./
-COPY ./.nuxt ./.nuxt
 
 RUN ls -al
 

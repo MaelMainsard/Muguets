@@ -70,6 +70,19 @@ const hoveredCategoryId = ref<number | null>(null);
 const sortedCategoryList = ref<{ id: number; name: string }[]>([]);
 
 onMounted(async () => {
+  function getQueryParam(name:string) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
+
+  // Extraction des tokens depuis les paramètres de requête
+  const accessToken = getQueryParam('accessToken');
+  const refreshToken = getQueryParam('refreshToken');
+
+  // Utilisation des tokens comme nécessaire
+  console.log('Access Token:', accessToken);
+  console.log('Refresh Token:', refreshToken);
+  
   try {
     const response = await axios.get('http://127.0.0.1:4688/v1/parent-categories');
     response.data.forEach(async (category: { id: number; name: any }) => {
